@@ -1,0 +1,13 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:context="com.lakesidestudio.apphelper.MainActivity">
+    <item android:title="Google Play Service Upgrade"
+        android:id="@+id/action_googleplayservice_upgrade" />
+    <item android:title="Google Play Service Setting"
+        android:id="@+id/action_googleplayservice_setting" />
+    <item android:title="Google Framework Setting"
+        android:id="@+id/action_googleframework_setting" />
+    <item android:title="Google Play Store Setting"
+        android:id="@+id/action_googleplaystore_setting" />
+</menu>
