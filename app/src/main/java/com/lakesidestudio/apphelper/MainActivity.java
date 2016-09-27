@@ -20,6 +20,7 @@ import android.widget.ListView;
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
+    public static final int SEARCH_REQUEST = 100;
     private AppHelper appHelper;
 
     @Override
@@ -34,8 +35,9 @@ public class MainActivity extends AppCompatActivity {
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
+//                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
+//                        .setAction("Action", null).show();
+                startActivityForResult(new Intent(MainActivity.this, SearchActivity.class), SEARCH_REQUEST);
             }
         });
 
@@ -77,5 +79,27 @@ public class MainActivity extends AppCompatActivity {
     private void readAppList() {
         ListView listView = (ListView) findViewById(R.id.listview);
         listView.setAdapter(new AppListAdapter(this));
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        switch (requestCode) {
+            case SEARCH_REQUEST:
+                if (resultCode == RESULT_OK) {
+                    ListView listView = (ListView) findViewById(R.id.listview);
+                    Bundle extras = data.getExtras();
+                    if (extras.containsKey(Constants.SEARCH_SYSTEM)) {
+                        ((AppListAdapter.AppListFilter) ((AppListAdapter) listView.getAdapter()).getFilter()).setSystem(extras.getBoolean(Constants.SEARCH_SYSTEM));
+                    } else {
+                        ((AppListAdapter.AppListFilter) ((AppListAdapter) listView.getAdapter()).getFilter()).setSystem(null);
+                    }
+                    if (!extras.getString(Constants.SEARCH_NAME).equals("")) {
+                        ((AppListAdapter) listView.getAdapter()).getFilter().filter(extras.getString(Constants.SEARCH_NAME));
+                    } else {
+                        ((AppListAdapter) listView.getAdapter()).getFilter().filter("");
+                    }
+                }
+                break;
+        }
     }
 }

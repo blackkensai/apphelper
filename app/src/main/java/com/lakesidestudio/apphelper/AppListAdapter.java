@@ -37,26 +37,12 @@ public class AppListAdapter extends BaseAdapter implements Filterable {
     private List<ApplicationInfo> packages;
     private LayoutInflater inflater = null;
     private volatile boolean inited = false;
-    private Set<String> filters = new HashSet<>();
+    private AppListFilter appListFilter;
+
     public AppListAdapter(Context context) {
         this.inflater = LayoutInflater.from(context);
         this.context = context;
         this.appHelper = new AppHelper(context);
-
-        filters.add("com.android.");
-        filters.add("com.xiaomi.");
-        filters.add("com.mi.");
-        filters.add("com.miui.");
-    }
-
-    private boolean filter(String packagename) {
-        for (String filter :
-                filters) {
-            if (packagename.startsWith(filter)) {
-                return false;
-            }
-        }
-        return true;
     }
 
     private void init() {
@@ -68,9 +54,6 @@ public class AppListAdapter extends BaseAdapter implements Filterable {
         for (ApplicationInfo info :
                 context.getPackageManager()
                         .getInstalledApplications(PackageManager.GET_META_DATA)) {
-            if (!filter(info.packageName)) {
-                continue;
-            }
             packages.add(info);
         }
         Collections.sort(packages, new Comparator<ApplicationInfo>() {
@@ -114,7 +97,7 @@ public class AppListAdapter extends BaseAdapter implements Filterable {
                 @Override
                 public void onClick(View view) {
                     Intent intent = new Intent(context, DetailActivity.class);
-                    intent.putExtra("ApplicationInfo", ((ViewHolder)view.getTag()).applicationInfo);
+                    intent.putExtra("ApplicationInfo", ((ViewHolder) view.getTag()).applicationInfo);
                     context.startActivity(intent);
                 }
             });
@@ -131,17 +114,10 @@ public class AppListAdapter extends BaseAdapter implements Filterable {
 
     @Override
     public Filter getFilter() {
-        return new Filter() {
-            @Override
-            protected FilterResults performFiltering(CharSequence charSequence) {
-                return null;
-            }
-
-            @Override
-            protected void publishResults(CharSequence charSequence, FilterResults filterResults) {
-
-            }
-        };
+        if (appListFilter == null) {
+            appListFilter = new AppListFilter();
+        }
+        return appListFilter;
     }
 
 
@@ -153,4 +129,63 @@ public class AppListAdapter extends BaseAdapter implements Filterable {
     }
 
 
+    public class AppListFilter extends Filter {
+        private Boolean system;
+        private Boolean game;
+
+        @Override
+        protected FilterResults performFiltering(CharSequence charSequence) {
+            FilterResults filterResults = new FilterResults();
+            List<ApplicationInfo> filteredPackages = new ArrayList<>();
+            boolean needFilterName = charSequence != null && charSequence.length() != 0;
+            for (ApplicationInfo applicationInfo : context.getPackageManager()
+                    .getInstalledApplications(PackageManager.GET_META_DATA)
+                    ) {
+                if (system != null && system != appHelper.isSystemApp(applicationInfo)) {
+                    continue;
+                }
+                if (game != null && game != appHelper.isGame(applicationInfo)) {
+                    continue;
+                }
+                if (needFilterName) {
+                    if (!appHelper.getAppName(applicationInfo).toString().contains(charSequence) &&
+                            !applicationInfo.packageName.contains(charSequence)) {
+                        continue;
+                    }
+                }
+                filteredPackages.add(applicationInfo);
+            }
+            Collections.sort(filteredPackages, new Comparator<ApplicationInfo>() {
+                @Override
+                public int compare(ApplicationInfo a0, ApplicationInfo a1) {
+                    return a0.packageName.compareTo(a1.packageName);
+                }
+            });
+            filterResults.count = filteredPackages.size();
+            filterResults.values = filteredPackages;
+            return filterResults;
+        }
+
+        @Override
+        protected void publishResults(CharSequence charSequence, FilterResults filterResults) {
+            packages = (List<ApplicationInfo>) filterResults.values;
+            notifyDataSetChanged();
+        }
+
+        public Boolean getGame() {
+            return game;
+        }
+
+        public void setGame(Boolean game) {
+            this.game = game;
+        }
+
+        public Boolean getSystem() {
+            return system;
+        }
+
+        public void setSystem(Boolean system) {
+            this.system = system;
+        }
+    }
 }
