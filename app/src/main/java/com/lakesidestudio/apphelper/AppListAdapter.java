@@ -4,10 +4,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
-import android.net.Uri;
-import android.os.Build;
-import android.provider.Settings;
-import android.support.annotation.RequiresApi;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -17,14 +13,12 @@ import android.widget.Filterable;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.lakesidestudio.apphelper.domain.SearchCondition;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
-
-import static android.service.notification.Condition.SCHEME;
 
 
 /**
@@ -34,7 +28,7 @@ import static android.service.notification.Condition.SCHEME;
 public class AppListAdapter extends BaseAdapter implements Filterable {
     private Context context;
     private AppHelper appHelper;
-    private List<ApplicationInfo> packages;
+    private List<ApplicationInfo> packages = new ArrayList<>();
     private LayoutInflater inflater = null;
     private volatile boolean inited = false;
     private AppListFilter appListFilter;
@@ -43,32 +37,11 @@ public class AppListAdapter extends BaseAdapter implements Filterable {
         this.inflater = LayoutInflater.from(context);
         this.context = context;
         this.appHelper = new AppHelper(context);
-    }
-
-    private void init() {
-        if (inited) {
-            return;
-        }
-
-        packages = new ArrayList<>(100);
-        for (ApplicationInfo info :
-                context.getPackageManager()
-                        .getInstalledApplications(PackageManager.GET_META_DATA)) {
-            packages.add(info);
-        }
-        Collections.sort(packages, new Comparator<ApplicationInfo>() {
-            @Override
-            public int compare(ApplicationInfo a0, ApplicationInfo a1) {
-                return a0.packageName.compareTo(a1.packageName);
-            }
-        });
-        inited = true;
-
+        ((AppListFilter) this.getFilter()).setSearchCondition(new SearchCondition());
     }
 
     @Override
     public int getCount() {
-        init();
         return packages.size();
     }
 
@@ -130,26 +103,25 @@ public class AppListAdapter extends BaseAdapter implements Filterable {
 
 
     public class AppListFilter extends Filter {
-        private Boolean system;
-        private Boolean game;
+        private SearchCondition searchCondition;
 
         @Override
         protected FilterResults performFiltering(CharSequence charSequence) {
             FilterResults filterResults = new FilterResults();
             List<ApplicationInfo> filteredPackages = new ArrayList<>();
-            boolean needFilterName = charSequence != null && charSequence.length() != 0;
+            boolean needFilterName = searchCondition.name != null && searchCondition.name.length() != 0;
             for (ApplicationInfo applicationInfo : context.getPackageManager()
                     .getInstalledApplications(PackageManager.GET_META_DATA)
                     ) {
-                if (system != null && system != appHelper.isSystemApp(applicationInfo)) {
+                if (searchCondition.system != null && searchCondition.system != appHelper.isSystemApp(applicationInfo)) {
                     continue;
                 }
-                if (game != null && game != appHelper.isGame(applicationInfo)) {
+                if (searchCondition.game != null && searchCondition.game != appHelper.isGame(applicationInfo)) {
                     continue;
                 }
                 if (needFilterName) {
-                    if (!appHelper.getAppName(applicationInfo).toString().contains(charSequence) &&
-                            !applicationInfo.packageName.contains(charSequence)) {
+                    if (!appHelper.getAppName(applicationInfo).toString().toLowerCase().contains(searchCondition.name.toLowerCase()) &&
+                            !applicationInfo.packageName.toLowerCase().contains(searchCondition.name.toLowerCase())) {
                         continue;
                     }
                 }
@@ -166,26 +138,19 @@ public class AppListAdapter extends BaseAdapter implements Filterable {
             return filterResults;
         }
 
+        public SearchCondition getSearchCondition() {
+            return searchCondition;
+        }
+
+        public void setSearchCondition(SearchCondition searchCondition) {
+            this.searchCondition = searchCondition;
+        }
+
         @Override
         protected void publishResults(CharSequence charSequence, FilterResults filterResults) {
             packages = (List<ApplicationInfo>) filterResults.values;
             notifyDataSetChanged();
         }
 
-        public Boolean getGame() {
-            return game;
-        }
-
-        public void setGame(Boolean game) {
-            this.game = game;
-        }
-
-        public Boolean getSystem() {
-            return system;
-        }
-
-        public void setSystem(Boolean system) {
-            this.system = system;
-        }
     }
 }

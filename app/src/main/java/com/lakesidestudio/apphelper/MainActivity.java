@@ -1,27 +1,22 @@
 package com.lakesidestudio.apphelper;
 
 import android.content.Intent;
-import android.content.pm.ApplicationInfo;
-import android.content.pm.PackageManager;
-import android.database.DataSetObserver;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.ViewGroup;
-import android.widget.ListAdapter;
 import android.widget.ListView;
 
-import java.util.List;
+import com.lakesidestudio.apphelper.domain.Constants;
+import com.lakesidestudio.apphelper.domain.SearchCondition;
 
 public class MainActivity extends AppCompatActivity {
     public static final int SEARCH_REQUEST = 100;
     private AppHelper appHelper;
+    private AppListAdapter appListAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -37,7 +32,11 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View view) {
 //                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
 //                        .setAction("Action", null).show();
-                startActivityForResult(new Intent(MainActivity.this, SearchActivity.class), SEARCH_REQUEST);
+                Intent intent = new Intent(MainActivity.this, SearchActivity.class);
+                Bundle extras = new Bundle();
+                extras.putParcelable(Constants.SEARCH_CONDITION, ((AppListAdapter.AppListFilter) appListAdapter.getFilter()).getSearchCondition());
+                intent.putExtras(extras);
+                startActivityForResult(intent, SEARCH_REQUEST);
             }
         });
 
@@ -78,7 +77,8 @@ public class MainActivity extends AppCompatActivity {
 
     private void readAppList() {
         ListView listView = (ListView) findViewById(R.id.listview);
-        listView.setAdapter(new AppListAdapter(this));
+        appListAdapter = new AppListAdapter(this);
+        listView.setAdapter(appListAdapter);
     }
 
     @Override
@@ -88,16 +88,10 @@ public class MainActivity extends AppCompatActivity {
                 if (resultCode == RESULT_OK) {
                     ListView listView = (ListView) findViewById(R.id.listview);
                     Bundle extras = data.getExtras();
-                    if (extras.containsKey(Constants.SEARCH_SYSTEM)) {
-                        ((AppListAdapter.AppListFilter) ((AppListAdapter) listView.getAdapter()).getFilter()).setSystem(extras.getBoolean(Constants.SEARCH_SYSTEM));
-                    } else {
-                        ((AppListAdapter.AppListFilter) ((AppListAdapter) listView.getAdapter()).getFilter()).setSystem(null);
-                    }
-                    if (!extras.getString(Constants.SEARCH_NAME).equals("")) {
-                        ((AppListAdapter) listView.getAdapter()).getFilter().filter(extras.getString(Constants.SEARCH_NAME));
-                    } else {
-                        ((AppListAdapter) listView.getAdapter()).getFilter().filter("");
-                    }
+                    AppListAdapter appListAdapter = (AppListAdapter) listView.getAdapter();
+                    AppListAdapter.AppListFilter filter = (AppListAdapter.AppListFilter) appListAdapter.getFilter();
+                    filter.setSearchCondition((SearchCondition) extras.get(Constants.SEARCH_CONDITION));
+                    filter.filter(null);
                 }
                 break;
         }
