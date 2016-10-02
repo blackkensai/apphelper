@@ -100,10 +100,9 @@ public class AppHelper {
     public void openInGooglePlay(ApplicationInfo applicationInfo) {
         String packageName = applicationInfo.packageName;
         openInGooglePlay(packageName);
-
     }
 
-    private void openInGooglePlay(String packageName) {
+    public void openInGooglePlay(String packageName) {
         Intent rateIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id=" + packageName));
         boolean marketFound = false;
 
@@ -135,6 +134,15 @@ public class AppHelper {
                 context.startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("https://play.google.com/store/apps/details?id=" + packageName)));
             }
         }
+    }
+
+    public void downloadByWeb(ApplicationInfo applicationInfo) {
+        String packageName = applicationInfo.packageName;
+        downloadByWeb(packageName);
+    }
+
+    public void downloadByWeb(String packageName) {
+        context.startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("http://apk-downloaders.com/?id=" + packageName)));
     }
 
     public void openGooglePlayServicePage4Upgrade() {

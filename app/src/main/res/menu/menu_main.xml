@@ -2,6 +2,8 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     tools:context="com.lakesidestudio.apphelper.MainActivity">
+    <item android:title="Open Url In Google Play"
+        android:id="@+id/action_open_url_in_googleplay" />
     <item android:title="Google Play Service Upgrade"
         android:id="@+id/action_googleplayservice_upgrade" />
     <item android:title="Google Play Service Setting"
