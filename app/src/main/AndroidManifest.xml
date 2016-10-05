@@ -3,6 +3,8 @@
     package="com.lakesidestudio.apphelper">
 
     <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
+    <uses-permission android:name="android.permission.BLUETOOTH" />
+
     <application
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
@@ -12,15 +14,45 @@
         <activity
             android:name=".MainActivity"
             android:label="@string/app_name"
+            android:taskAffinity="com.lakesidestudio.apphelper.MainActivity"
             android:theme="@style/AppTheme.NoActionBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
         <activity android:name=".DetailActivity" />
-        <activity android:name=".SearchActivity"></activity>
+        <activity android:name=".SearchActivity" />
+        <activity
+            android:name=".LockActivity"
+            android:label="@string/appwidget_text"
+            android:taskAffinity="com.lakesidestudio.apphelper.LockActivity"
+            android:theme="@style/AppTheme.NoActionBar">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+                <action android:name="android.app.action.DEVICE_ADMIN_ENABLED" />
+            </intent-filter>
+            <meta-data
+                android:name="android.app.device_admin"
+                android:resource="@xml/policies" />
+        </activity>
+
+        <receiver
+            android:name=".QuickButtonAppWidget"
+            android:permission="android.permission.BIND_DEVICE_ADMIN">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+                <action android:name="android.app.action.DEVICE_ADMIN_ENABLED" />
+            </intent-filter>
+
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/quick_button_app_widget_info" />
+            <meta-data
+                android:name="android.app.device_admin"
+                android:resource="@xml/policies" />
+        </receiver>
     </application>
-    <uses-permission android:name="android.permission.BLUETOOTH"/>
+
 </manifest>
