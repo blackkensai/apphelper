@@ -36,20 +36,17 @@ public class AppHelper {
 
     public List<ApplicationInfo> getAppList() {
         List<ApplicationInfo> packages = new ArrayList<>(100);
-        for (ApplicationInfo info :
-                context.getPackageManager()
-                        .getInstalledApplications(PackageManager.GET_META_DATA)) {
-//            if (!filter(info.packageName)) {
-//                continue;
+//        for (ApplicationInfo info :
+//                context.getPackageManager()
+//                        .getInstalledApplications(PackageManager.GET_META_DATA)) {
+//            packages.add(info);
+//        }
+//        Collections.sort(packages, new Comparator<ApplicationInfo>() {
+//            @Override
+//            public int compare(ApplicationInfo a0, ApplicationInfo a1) {
+//                return a0.packageName.compareTo(a1.packageName);
 //            }
-            packages.add(info);
-        }
-        Collections.sort(packages, new Comparator<ApplicationInfo>() {
-            @Override
-            public int compare(ApplicationInfo a0, ApplicationInfo a1) {
-                return a0.packageName.compareTo(a1.packageName);
-            }
-        });
+//        });
         return packages;
     }
 

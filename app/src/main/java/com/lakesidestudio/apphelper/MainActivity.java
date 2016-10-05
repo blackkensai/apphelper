@@ -119,6 +119,7 @@ public class MainActivity extends AppCompatActivity {
         ListView listView = (ListView) findViewById(R.id.listview);
         appListAdapter = new AppListAdapter(this);
         listView.setAdapter(appListAdapter);
+        appListAdapter.getFilter().filter(null);
     }
 
     @Override

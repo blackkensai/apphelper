@@ -13,6 +13,9 @@ import android.widget.Filterable;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.github.stuxuhai.jpinyin.PinyinException;
+import com.github.stuxuhai.jpinyin.PinyinFormat;
+import com.github.stuxuhai.jpinyin.PinyinHelper;
 import com.lakesidestudio.apphelper.domain.SearchCondition;
 
 import java.util.ArrayList;
@@ -30,7 +33,6 @@ public class AppListAdapter extends BaseAdapter implements Filterable {
     private AppHelper appHelper;
     private List<ApplicationInfo> packages = new ArrayList<>();
     private LayoutInflater inflater = null;
-    private volatile boolean inited = false;
     private AppListFilter appListFilter;
 
     public AppListAdapter(Context context) {
@@ -130,7 +132,15 @@ public class AppListAdapter extends BaseAdapter implements Filterable {
             Collections.sort(filteredPackages, new Comparator<ApplicationInfo>() {
                 @Override
                 public int compare(ApplicationInfo a0, ApplicationInfo a1) {
-                    return a0.packageName.compareTo(a1.packageName);
+                    String n0 = appHelper.getAppName(a0).toString();
+                    String n1 = appHelper.getAppName(a1).toString();
+                    try {
+                        return PinyinHelper.convertToPinyinString(n0, "", PinyinFormat.WITHOUT_TONE)
+                                .compareTo(PinyinHelper.convertToPinyinString(n1, "", PinyinFormat.WITHOUT_TONE));
+                    } catch (PinyinException e) {
+                        e.printStackTrace();
+                        return n0.compareTo(n1);
+                    }
                 }
             });
             filterResults.count = filteredPackages.size();
